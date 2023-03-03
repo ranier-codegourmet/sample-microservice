@@ -65,6 +65,7 @@ export class BidRepository {
           price: 1,
           name: '$user.name',
           user_id: '$user._id',
+          sold: 1,
         },
       },
     ]);

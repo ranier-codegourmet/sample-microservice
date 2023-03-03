@@ -17,6 +17,7 @@ export type EmitBidStatus = {
 export type UserBid = Pick<Bid, 'price'> & {
   name: string;
   user_id: string;
+  sold: boolean;
 };
 
 export type EmitBidList = {
