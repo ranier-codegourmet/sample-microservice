@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package bid;
+
+service BidService {
+  rpc BidStatus (BidStatusRequest) returns (BidStatusResponse) {}
+}
+
+message BidStatusRequest {
+  string user_id = 1;
+  string status = 2;
+  string message = 3;
+}
+
+message BidStatusResponse {
+  string message = 2;
+}
