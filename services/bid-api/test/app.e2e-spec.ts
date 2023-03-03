@@ -296,5 +296,71 @@ describe('BidController', () => {
         expect(body.message).toEqual('Bid item in process');
       });
     });
+
+    describe('GET /bid/item/:itemId', () => {
+      it('should return 401 when user is not authenticated', async () => {
+        const { status, body } = await request(testModule.app.getHttpServer()).get(
+          '/bid/item/5f9f3e7a1d8a7a1f0c6d2c7c',
+        );
+
+        expect(status).toBe(401);
+        expect(body.message).toEqual('Unauthorized');
+      });
+
+      it('should return 404 when item is not found', async () => {
+        await testModule.testService.createUser({
+          email,
+          password: 'passwod1',
+          name: 'test',
+          _id: String(userId),
+        });
+
+        const { status, body } = await request(testModule.app.getHttpServer())
+          .get('/bid/item/5f9f3e7a1d8a7a1f0c6d2c7c')
+          .set('Authorization', `Bearer ${generateJwt()}`);
+
+        expect(status).toBe(404);
+        expect(body.message).toEqual('Item not found');
+      });
+
+      it('should return 200 when item is found', async () => {
+        const user = await testModule.testService.createUser({
+          email,
+          password: 'passwod1',
+          name: 'test',
+          _id: String(userId),
+        });
+
+        const item = await testModule.testService.createItem({
+          name: 'test',
+          price: 1,
+          status: 'published',
+          bid_time: 1,
+          time_window: DateTime.now().plus({ hours: 1 }).toJSDate(),
+          user_id: String(userId),
+        });
+
+        const bid = await testModule.testService.createBid({
+          item_id: String(item._id),
+          user_id: String(userId),
+          price: 3,
+        });
+
+        const { status, body } = await request(testModule.app.getHttpServer())
+          .get(`/bid/item/${item._id}`)
+          .set('Authorization', `Bearer ${generateJwt()}`);
+
+        expect(status).toBe(200);
+        expect(body).toEqual([
+          {
+            _id: String(bid._id),
+            price: bid.price,
+            name: user.name,
+            sold: false,
+            user_id: String(userId),
+          },
+        ]);
+      });
+    });
   });
 });

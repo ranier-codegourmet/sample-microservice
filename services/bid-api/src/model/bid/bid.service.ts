@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DateTime } from 'luxon';
 
 import { ItemService } from '../item/item.service';
@@ -140,6 +140,12 @@ export class BidService {
   }
 
   public async getAllBidByItemId(item_id: string): Promise<UserBid[]> {
+    const item = await this.itemService.findItemById(item_id);
+
+    if (!item) {
+      throw new NotFoundException('Item not found');
+    }
+
     return this.bidRepository.findAllBidByItemId(item_id);
   }
 
