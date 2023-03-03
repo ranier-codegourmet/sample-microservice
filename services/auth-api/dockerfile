@@ -1,0 +1,30 @@
+ARG NODE_VERSION=16.19.0
+FROM node:${NODE_VERSION}-alpine As development
+
+WORKDIR /app
+
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+
+RUN npm install -g pnpm
+
+RUN pnpm install
+
+COPY . .
+
+RUN pnpm run build
+
+FROM node:${NODE_VERSION}-alpine as production
+
+WORKDIR /app
+
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+
+RUN npm install -g pnpm
+
+RUN pnpm install --prod
+
+COPY --from=development /app/dist ./dist
+
+CMD ["node", "dist/main"]
