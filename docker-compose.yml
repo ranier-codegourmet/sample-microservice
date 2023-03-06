@@ -1,0 +1,46 @@
+version: '3.7'
+services:
+  mongoclient:
+    image: mongo:4.4.18
+    volumes:
+      - ./scripts:/scripts
+    command: bash /scripts/initiate-replica.sh
+    depends_on:
+      - mongodb
+    networks:
+      - mongo-network
+  mongodb:
+    image: mongo:4.4.18
+    container_name: mongo1
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/db
+    command: '--replSet rs0 --bind_ip_all'
+    environment:
+      MONGO_REPLICA_SET_NAME: rs0
+    networks:
+      - mongo-network
+  redis:
+    container_name: redis
+    image: redis:latest
+    volumes:
+      - redis:/data/redis
+    ports:
+      - 6379:6379
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.8.0-management
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+volumes:
+  mongodb:
+  redis:
+  rabbitmq:
+
+networks:
+  mongo-network:
